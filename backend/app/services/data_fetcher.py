@@ -87,7 +87,7 @@ import yfinance as yf
 import pandas as pd
 from pathlib import Path
 
-def fetch_and_save_data(ticker="AAPL", start="2022-01-01", end="2023-01-01"):
+def fetch_and_save_data(ticker, start, end):
     print(f"Fetching data for {ticker}...")
 
     data = yf.download(ticker, start=start, end=end, progress=False)
@@ -126,8 +126,8 @@ def get_data(symbol, start_date, end_date):
     return df
 
 
-# 🔥 Manual test
-if __name__ == "__main__":
-    fetch_and_save_data()
-    df = get_data("AAPL", "2022-01-01", "2023-01-01")
-    print(df.head())
+# # 🔥 Manual test
+# if __name__ == "__main__":
+#     fetch_and_save_data()
+#     df = get_data("AAPL", "2022-01-01", "2023-01-01")
+#     print(df.head())
