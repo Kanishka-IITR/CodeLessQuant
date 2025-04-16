@@ -1,4 +1,4 @@
-#!C:\Users\m5cd2\Videos\KLS\backend\venv\Scripts\python.exe
+#!C:\Users\soumy\Videos\KLS\backend\venv\Scripts\python.exe
 
 import datetime
 import os
