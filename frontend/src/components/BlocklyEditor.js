@@ -1,6 +1,9 @@
+
+
 // import React, { useRef, useEffect } from "react";
 // import * as Blockly from "blockly";
 // import { javascriptGenerator } from "blockly/javascript";
+// import { jsonGenerator } from '../generators/jsonGenerator';
 // import { defineCustomBlocks } from './customBlocks';
 
 // function BlocklyEditor({ onCodeChange }) {
@@ -56,8 +59,8 @@
 //     });
 
 //     workspace.addChangeListener(() => {
-//       const code = javascriptGenerator.workspaceToCode(workspace);
-//       onCodeChange(code);
+//       const json = jsonGenerator.workspaceToJson(workspace);
+//       onCodeChange(JSON.stringify(json, null, 2)); // ✅ send JSON to parent
 //     });
 
 //     return () => workspace.dispose();
@@ -68,33 +71,6 @@
 
 // export default BlocklyEditor;
 
-// //
-// // ✅ Code Generators for Custom Blocks
-// //
-
-// // RSI
-// javascriptGenerator.forBlock['rsi_block'] = function (block) {
-//   const period = block.getFieldValue('PERIOD');
-//   const code = `rsi(${period})`;
-//   return [code, javascriptGenerator.ORDER_ATOMIC];
-// };
-
-// // SMA
-// javascriptGenerator.forBlock['sma_block'] = function (block) {
-//   const period = block.getFieldValue('PERIOD');
-//   const code = `sma(${period})`;
-//   return [code, javascriptGenerator.ORDER_ATOMIC];
-// };
-
-// // BUY
-// javascriptGenerator.forBlock['buy_block'] = function () {
-//   return 'buy();\n';
-// };
-
-// // SELL
-// javascriptGenerator.forBlock['sell_block'] = function () {
-//   return 'sell();\n';
-// };
 
 import React, { useRef, useEffect } from "react";
 import * as Blockly from "blockly";
@@ -105,7 +81,7 @@ import { defineCustomBlocks } from './customBlocks';
 function BlocklyEditor({ onCodeChange }) {
   const blocklyDiv = useRef(null);
 
-  // ✅ Toolbox with Categories
+  // ✅ Toolbox with Categories including all indicators
   const toolbox = {
     kind: "categoryToolbox",
     contents: [
@@ -133,6 +109,11 @@ function BlocklyEditor({ onCodeChange }) {
         contents: [
           { kind: "block", type: "rsi_block" },
           { kind: "block", type: "sma_block" },
+          { kind: "block", type: "ema_block" },
+          { kind: "block", type: "macd_block" },
+          { kind: "block", type: "bollinger_block" },
+          { kind: "block", type: "atr_block" },
+          { kind: "block", type: "stochastic_block" },
         ],
       },
       {
