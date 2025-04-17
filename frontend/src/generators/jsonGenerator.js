@@ -87,7 +87,17 @@ function parseBlock(block) {
       };
     }
 
-   
+    // case 'stochastic_block': {
+    //   const kPeriod = parseInt(block.getFieldValue('K_PERIOD'));
+    //   const dPeriod = parseInt(block.getFieldValue('D_PERIOD'));
+    //   const target = block.getFieldValue('TARGET'); // "%K" or "%D"
+    //   return {
+    //     type: 'STOCHASTIC',
+    //     kPeriod: parseInt(kPeriod),
+    // dPeriod: parseInt(dPeriod),
+    // target: target
+    //   };
+    // }
     case 'stochastic_block': {
       const kPeriod = block.getFieldValue('KPERIOD');
       const dPeriod = block.getFieldValue('DPERIOD');
