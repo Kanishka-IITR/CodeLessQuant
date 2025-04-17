@@ -48,7 +48,7 @@ function App() {
 
       <div style={{ marginBottom: '1rem' }}>
         <label>Stock Symbol: </label>
-        <input value={stockSymbol} onChange={e => setStockSymbol(e.target.value)} placeholder="AAPL" />
+        <input value={stockSymbol} onChange={e => setStockSymbol(e.target.value)} placeholder="e.g. AAPL" />
         <br />
         <label>Start Date: </label>
         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
