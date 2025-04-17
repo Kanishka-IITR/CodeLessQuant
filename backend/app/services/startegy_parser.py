@@ -1,5 +1,3 @@
-# backend/app/services/strategy_parser.py
-
 import xmltodict
 import json
 
