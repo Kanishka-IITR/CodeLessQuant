@@ -3,7 +3,18 @@ import * as Blockly from 'blockly';
 export const jsonGenerator = {
   workspaceToJson(workspace) {
     const topBlocks = workspace.getTopBlocks(true);
-    return topBlocks.map(block => parseBlock(block)).filter(b => b !== null);
+    const blocksJson = [];
+
+    for (const block of topBlocks) {
+      let currentBlock = block;
+      while (currentBlock) {
+        const parsed = parseBlock(currentBlock);
+        if (parsed) blocksJson.push(parsed);
+        currentBlock = currentBlock.getNextBlock(); // support chained top-level blocks
+      }
+    }
+
+    return blocksJson;
   }
 };
 
@@ -18,7 +29,7 @@ function parseBlock(block) {
       return {
         type: 'IF',
         condition: parseBlock(conditionBlock),
-        do: parseBlock(doBlock),
+        do: parseBlock(doBlock)
       };
     }
 
@@ -29,9 +40,9 @@ function parseBlock(block) {
 
       return {
         type: 'LOGIC_COMPARE',
-        operator: operator,
-        left: left,
-        right: right
+        operator,
+        left,
+        right
       };
     }
 
@@ -65,7 +76,7 @@ function parseBlock(block) {
       return {
         type: 'MACD',
         fast,
-        slow,
+        slow
       };
     }
 
@@ -75,7 +86,7 @@ function parseBlock(block) {
       return {
         type: 'BOLLINGER',
         period,
-        stdDev,
+        stdDev
       };
     }
 
@@ -83,37 +94,24 @@ function parseBlock(block) {
       const period = parseInt(block.getFieldValue('PERIOD'), 10);
       return {
         type: 'ATR',
-        period,
+        period
       };
     }
 
-    // case 'stochastic_block': {
-    //   const kPeriod = parseInt(block.getFieldValue('K_PERIOD'));
-    //   const dPeriod = parseInt(block.getFieldValue('D_PERIOD'));
-    //   const target = block.getFieldValue('TARGET'); // "%K" or "%D"
-    //   return {
-    //     type: 'STOCHASTIC',
-    //     kPeriod: parseInt(kPeriod),
-    // dPeriod: parseInt(dPeriod),
-    // target: target
-    //   };
-    // }
     case 'stochastic_block': {
       const kPeriod = block.getFieldValue('KPERIOD');
       const dPeriod = block.getFieldValue('DPERIOD');
-      const target = block.getFieldValue('TARGET'); // Capture the target value
-      
-      // Use a fallback if target is invalid
-      const parsedTarget = (target && !isNaN(target)) ? parseInt(target, 10) : 80; // Default to 80 if invalid
-    
+      const target = block.getFieldValue('TARGET');
+      const parsedTarget = (target && !isNaN(target)) ? parseInt(target, 10) : 80;
+
       return {
         type: 'STOCHASTIC',
         kPeriod: parseInt(kPeriod, 10),
         dPeriod: parseInt(dPeriod, 10),
-        target: parsedTarget // Ensure target is not null
+        target: parsedTarget
       };
     }
-    
+
     case 'buy_block':
       return { type: 'BUY' };
 
