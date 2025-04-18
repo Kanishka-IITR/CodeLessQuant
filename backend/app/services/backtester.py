@@ -56,7 +56,6 @@ def evaluate_condition(row, condition):
     typ = left.get("type")
     period = left.get("period", 14)
 
-    # Extract left-side value
     if typ == "RSI":
         value = row.get("RSI")
     elif typ == "SMA":
@@ -76,7 +75,6 @@ def evaluate_condition(row, condition):
     if pd.isna(value):
         return False
 
-    # Extract right-side value
     if isinstance(right, dict):
         r_typ = right.get("type")
         r_period = right.get("period", 14)
@@ -118,10 +116,8 @@ def process_rule(row, rule):
         condition = rule.get("condition")
         if evaluate_condition(row, condition):
             return process_rule(row, rule.get("do", {}))
-    elif rule["type"] == "BUY":
-        return "BUY"
-    elif rule["type"] == "SELL":
-        return "SELL"
+    elif rule["type"] in ["BUY", "SELL"]:
+        return rule
     return None
 
 # === Backtest Engine ===
@@ -138,7 +134,6 @@ def run_backtest(symbol, start_date, end_date, strategy_json, initial_balance):
     df["Date"] = pd.to_datetime(df["Date"])
     df.set_index("Date", inplace=True)
 
-    # Precompute indicators
     for rule in strategy_json:
         def collect_indicators(r):
             if r["type"] == "IF":
@@ -166,6 +161,10 @@ def run_backtest(symbol, start_date, end_date, strategy_json, initial_balance):
     balance = initial_balance
     position = None
     entry_price = 0
+    stop_loss = None
+    take_profit = None
+    trailing_stop = None
+    highest_price_since_entry = None
     trades = []
 
     for i in range(len(df)):
@@ -173,38 +172,82 @@ def run_backtest(symbol, start_date, end_date, strategy_json, initial_balance):
         date = row.name
         close = row["Close"]
 
-        for rule in strategy_json:
-            signal = process_rule(row, rule)
+        if position is not None:
+            if trailing_stop is not None:
+                highest_price_since_entry = max(highest_price_since_entry, close)
+                trailing_stop_price = highest_price_since_entry * (1 - trailing_stop)
+                if close < trailing_stop_price:
+                    profit = close - entry_price
+                    balance += profit
+                    trades.append({"date": str(date.date()), "action": "SELL (Trailing Stop)", "price": round(close, 2), "pnl": round(profit, 2)})
+                    position = None
+                    stop_loss = take_profit = trailing_stop = None
+                    continue
 
-            if signal == "BUY" and position is None:
-                entry_price = close
-                position = close
-                trades.append({
-                    "date": str(date.date()),
-                    "action": "BUY",
-                    "price": round(close, 2)
-                })
-
-            elif signal == "SELL" and position is not None:
+            if stop_loss is not None and close < entry_price * (1 - stop_loss):
                 profit = close - entry_price
                 balance += profit
-                trades.append({
-                    "date": str(date.date()),
-                    "action": "SELL",
-                    "price": round(close, 2),
-                    "pnl": round(profit, 2)
-                })
+                trades.append({"date": str(date.date()), "action": "SELL (Stop Loss)", "price": round(close, 2), "pnl": round(profit, 2)})
                 position = None
+                stop_loss = take_profit = trailing_stop = None
+                continue
+
+            if take_profit is not None and close > entry_price * (1 + take_profit):
+                profit = close - entry_price
+                balance += profit
+                trades.append({"date": str(date.date()), "action": "SELL (Take Profit)", "price": round(close, 2), "pnl": round(profit, 2)})
+                position = None
+                stop_loss = take_profit = trailing_stop = None
+                continue
+
+        for rule in strategy_json:
+            signal = process_rule(row, rule)
+            if not signal:
+                continue
+
+            if signal["type"] == "BUY" and position is None:
+                entry_price = close
+                position = close
+                highest_price_since_entry = close
+                stop_loss = signal.get("stop_loss")
+                take_profit = signal.get("take_profit")
+                trailing_stop = signal.get("trailing_stop")
+                trades.append({"date": str(date.date()), "action": "BUY", "price": round(close, 2)})
+
+            elif signal["type"] == "SELL" and position is not None:
+                profit = close - entry_price
+                balance += profit
+                trades.append({"date": str(date.date()), "action": "SELL", "price": round(close, 2), "pnl": round(profit, 2)})
+                position = None
+                stop_loss = take_profit = trailing_stop = None
 
     final_balance = round(balance, 2)
     returns = df["Close"].pct_change().dropna()
     sharpe = (returns.mean() / returns.std()) * (252 ** 0.5) if returns.std() else 0
+
+    # === Advanced Metrics ===
+    pnls = [t["pnl"] for t in trades if "pnl" in t]
+    avg_profit = sum(pnls) / len(pnls) if pnls else 0
+    win_rate = (len([p for p in pnls if p > 0]) / len(pnls)) * 100 if pnls else 0
+    total_profit = sum(p for p in pnls if p > 0)
+    total_loss = sum(p for p in pnls if p <= 0)
+    avg_win = total_profit / len([p for p in pnls if p > 0]) if any(p > 0 for p in pnls) else 0
+    avg_loss = total_loss / len([p for p in pnls if p <= 0]) if any(p <= 0 for p in pnls) else 0
+
+    running_max = df["Close"].cummax()
+    drawdown = (df["Close"] - running_max) / running_max
+    max_drawdown = round(drawdown.min() * 100, 2)
 
     return {
         "final_balance": float(final_balance),
         "starting_balance": float(initial_balance),
         "total_trades": len(trades),
         "sharpe_ratio": round(sharpe, 2),
+        "win_rate": round(win_rate, 2),
+        "avg_win": round(avg_win, 2),
+        "avg_loss": round(avg_loss, 2),
+        "average_profit": round(avg_profit, 2),
+        "max_drawdown": max_drawdown,
         "trades": [
             {
                 "date": t["date"],
