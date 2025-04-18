@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import backtest
+from app.routes import live_price
+
+
 
 app = FastAPI()
 
@@ -15,3 +18,4 @@ app.add_middleware(
 
 # Include router
 app.include_router(backtest.router, prefix="/api")
+app.include_router(live_price.router)
