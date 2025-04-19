@@ -25,7 +25,7 @@ function StrategySelector({ onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Build Your Strategy 🧱</h3>
+      <h3>Build Your Strategy </h3>
 
       <label>Stock Symbol: </label>
       <input

@@ -7,7 +7,7 @@ import { defineCustomBlocks } from './customBlocks';
 function BlocklyEditor({ onCodeChange }) {
   const blocklyDiv = useRef(null);
 
-  // ✅ Toolbox with Categories including all indicators
+  // Toolbox with Categories including all indicators
   const toolbox = {
     kind: "categoryToolbox",
     contents: [
@@ -55,7 +55,7 @@ function BlocklyEditor({ onCodeChange }) {
   };
 
   useEffect(() => {
-    defineCustomBlocks(); // ✅ Register custom blocks before injecting Blockly
+    defineCustomBlocks(); // Register custom blocks before injecting Blockly
 
     const workspace = Blockly.inject(blocklyDiv.current, {
       toolbox: toolbox,
@@ -63,7 +63,7 @@ function BlocklyEditor({ onCodeChange }) {
 
     workspace.addChangeListener(() => {
       const json = jsonGenerator.workspaceToJson(workspace);
-      onCodeChange(JSON.stringify(json, null, 2)); // ✅ send JSON to parent
+      onCodeChange(JSON.stringify(json, null, 2)); // send JSON to parent
     });
 
     return () => workspace.dispose();
