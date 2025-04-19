@@ -4,6 +4,8 @@ import BlocklyEditor from './components/BlocklyEditor';
 import axios from 'axios';
 import MetricsTable from './components/MetricsTable';
 import LivePriceViewer from './components/LivePriceViewer';
+import EquityChart from './components/EquityChart'; // 👈 add this line
+
 
 function App() {
   const [codeJson, setCodeJson] = useState('');
@@ -18,40 +20,101 @@ function App() {
   const [trailingStop, setTrailingStop] = useState('');
   const [result, setResult] = useState(null);
   const [metrics, setMetrics] = useState(null);
+  const [equityCurve, setEquityCurve] = useState([]);
+  const [results, setResults] = useState(null);
 
-  const handleBacktest = async () => {
-    if (!stockSymbol || !startDate || !endDate || !codeJson || !initialBalance) {
-      alert("Please fill in all fields including balance.");
-      return;
-    }
+//   const handleBacktest = async () => {
+//     setResult(response.data);
+// setEquityCurve(response.data.equity_curve); // 👈 correctly using response
+//     if (!stockSymbol || !startDate || !endDate || !codeJson || !initialBalance) {
+//       alert("Please fill in all fields including balance.");
+//       return;
+//     }
 
-    try {
-      const parsedCode = typeof codeJson === 'string' ? JSON.parse(codeJson) : codeJson;
+//     try {
+//       const parsedCode = typeof codeJson === 'string' ? JSON.parse(codeJson) : codeJson;
 
-      const payload = {
-        symbol: stockSymbol.trim(),
-        start_date: startDate.trim(),
-        end_date: endDate.trim(),
-        initial_balance: parseFloat(initialBalance),
-        code: parsedCode,
-        stop_loss: stopLoss !== '' ? parseFloat(stopLoss) : null,
-        take_profit: takeProfit !== '' ? parseFloat(takeProfit) : null,
-        trailing_stop: trailingStop !== '' ? parseFloat(trailingStop) : null,
-      };
+//       const payload = {
+//         symbol: stockSymbol.trim(),
+//         start_date: startDate.trim(),
+//         end_date: endDate.trim(),
+//         initial_balance: parseFloat(initialBalance),
+//         code: parsedCode,
+//         stop_loss: stopLoss !== '' ? parseFloat(stopLoss) : null,
+//         take_profit: takeProfit !== '' ? parseFloat(takeProfit) : null,
+//         trailing_stop: trailingStop !== '' ? parseFloat(trailingStop) : null,
+//       };
 
-      console.log("📦 Sending payload:", JSON.stringify(payload, null, 2));
+//       console.log("📦 Sending payload:", JSON.stringify(payload, null, 2));
 
-      const response = await axios.post('http://localhost:8000/api/backtest', payload);
-      console.log("✅ Backtest success:", response.data);
-      setResult(response.data);
+//       const response = await axios.post('http://localhost:8000/api/backtest', payload);
+//       console.log("✅ Backtest success:", response.data);
+//       setResult(response.data);
+//       setEquityCurve(response.data.equity_curve); // ✅ Fixed
 
-      const { final_balance, starting_balance, sharpe_ratio, total_trades, win_rate, avg_win, avg_loss, max_drawdown } = response.data;
-      setMetrics({ final_balance, starting_balance, sharpe_ratio, total_trades, win_rate, avg_win, avg_loss, max_drawdown });
-    } catch (error) {
-      console.error('❌ Backtest failed:', error);
-      setResult({ error: error.response?.data || "Network or parsing error." });
-    }
-  };
+//       const { final_balance, starting_balance, sharpe_ratio, total_trades, win_rate, avg_win, avg_loss, max_drawdown } = response.data;
+//       setMetrics({ final_balance, starting_balance, sharpe_ratio, total_trades, win_rate, avg_win, avg_loss, max_drawdown });
+//     } catch (error) {
+//       console.error('❌ Backtest failed:', error);
+//       setResult({ error: error.response?.data || "Network or parsing error." });
+//     }
+//   };
+const handleBacktest = async () => {
+  if (!stockSymbol || !startDate || !endDate || !codeJson || !initialBalance) {
+    alert("Please fill in all fields including balance.");
+    return;
+  }
+
+  try {
+    const parsedCode = typeof codeJson === 'string' ? JSON.parse(codeJson) : codeJson;
+
+    const payload = {
+      symbol: stockSymbol.trim(),
+      start_date: startDate.trim(),
+      end_date: endDate.trim(),
+      initial_balance: parseFloat(initialBalance),
+      code: parsedCode,
+      stop_loss: stopLoss !== '' ? parseFloat(stopLoss) : null,
+      take_profit: takeProfit !== '' ? parseFloat(takeProfit) : null,
+      trailing_stop: trailingStop !== '' ? parseFloat(trailingStop) : null,
+    };
+
+    console.log("📦 Sending payload:", JSON.stringify(payload, null, 2));
+
+    const response = await axios.post('http://localhost:8000/api/backtest', payload);
+    console.log("✅ Backtest success:", response.data);
+
+    setResult(response.data); // ✅ set result
+    setEquityCurve(response.data.equity_curve); // ✅ use response here
+    console.log("Equity Curve Sample:", response.data.equity_curve.slice(0, 10));
+
+    const {
+      final_balance,
+      starting_balance,
+      sharpe_ratio,
+      total_trades,
+      win_rate,
+      avg_win,
+      avg_loss,
+      max_drawdown
+    } = response.data;
+
+    setMetrics({
+      final_balance,
+      starting_balance,
+      sharpe_ratio,
+      total_trades,
+      win_rate,
+      avg_win,
+      avg_loss,
+      max_drawdown
+    });
+
+  } catch (error) {
+    console.error('❌ Backtest failed:', error);
+    setResult({ error: error.response?.data || "Network or parsing error." });
+  }
+};
 
   return (
     <div style={{ padding: '1rem' }}>
@@ -115,7 +178,7 @@ function App() {
               }} />
             </div>
           )}
-
+          <EquityChart equityData={equityCurve} />
           <pre style={{ backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>
             {JSON.stringify(result, null, 2)}
           </pre>

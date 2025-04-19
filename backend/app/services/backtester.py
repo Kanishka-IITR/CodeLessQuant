@@ -166,11 +166,14 @@ def run_backtest(symbol, start_date, end_date, strategy_json, initial_balance):
     trailing_stop = None
     highest_price_since_entry = None
     trades = []
+    equity_curve = []
 
     for i in range(len(df)):
         row = df.iloc[i]
         date = row.name
         close = row["Close"]
+        equity_curve.append({"date": str(date.date()), "equity": round(balance, 2)})
+
 
         if position is not None:
             if trailing_stop is not None:
@@ -255,7 +258,8 @@ def run_backtest(symbol, start_date, end_date, strategy_json, initial_balance):
                 "price": float(t["price"]),
                 **({"pnl": float(t["pnl"])} if "pnl" in t else {})
             } for t in trades
-        ]
+        ],
+         "equity_curve": equity_curve
     }
 
 # import pandas as pd
