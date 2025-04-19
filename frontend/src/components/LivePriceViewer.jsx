@@ -29,7 +29,7 @@ const LivePriceViewer = ({ ticker }) => {
     };
 
     fetchPrice();
-    const interval = setInterval(fetchPrice, 5000);
+    const interval = setInterval(fetchPrice, 200000);
     return () => clearInterval(interval);
   }, [ticker]);
 
