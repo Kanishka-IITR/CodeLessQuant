@@ -5,7 +5,7 @@ function MetricsTable({ metrics }) {
 
   return (
     <div style={{ marginTop: '1rem' }}>
-      <h3>📊 Performance Summary</h3>
+      <h3>Performance Summary</h3>
       <table border="1" cellPadding="10">
         <tbody>
           <tr><td>Starting Balance</td><td>${metrics.starting_balance}</td></tr>
@@ -16,6 +16,7 @@ function MetricsTable({ metrics }) {
           <tr><td>Average Win</td><td>{metrics.avg_win}</td></tr>
           <tr><td>Average Loss</td><td>{metrics.avg_loss}</td></tr>
           <tr><td>Max Drawdown</td><td>{metrics.max_drawdown}%</td></tr>
+          <tr><td>avg_profit_per_trade</td><td>{metrics.avg_profit_per_trade}%</td></tr>
         </tbody>
       </table>
     </div>

@@ -1,7 +1,7 @@
 import * as Blockly from 'blockly';
 
 export function defineCustomBlocks() {
-  // ✅ RSI Block
+  //  RSI Block
   Blockly.Blocks['rsi_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -15,7 +15,7 @@ export function defineCustomBlocks() {
     },
   };
 
-  // ✅ SMA Block
+  // SMA Block
   Blockly.Blocks['sma_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -29,7 +29,7 @@ export function defineCustomBlocks() {
     },
   };
 
-  // ✅ EMA Block
+  //  EMA Block
   Blockly.Blocks['ema_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -43,7 +43,7 @@ export function defineCustomBlocks() {
     },
   };
 
-  // ✅ MACD Block
+  //  MACD Block
   Blockly.Blocks['macd_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -61,7 +61,7 @@ export function defineCustomBlocks() {
     },
   };
 
-  // ✅ Bollinger Bands Block
+  // Bollinger Bands Block
   Blockly.Blocks['bollinger_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -77,7 +77,7 @@ export function defineCustomBlocks() {
     },
   };
 
-  // ✅ ATR Block
+  // ATR Block
   Blockly.Blocks['atr_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -92,7 +92,7 @@ export function defineCustomBlocks() {
   };
 
 
-  // ✅ Buy Block
+  // Buy Block
   Blockly.Blocks['buy_block'] = {
     init: function () {
       this.appendDummyInput()
@@ -105,7 +105,7 @@ export function defineCustomBlocks() {
     },
   };
 
-  // ✅ Sell Block
+  //  Sell Block
   Blockly.Blocks['sell_block'] = {
     init: function () {
       this.appendDummyInput()
